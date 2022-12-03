@@ -21,7 +21,7 @@ Repeat this action for `flutter-mapbox-gl` for both dependencies:
 Replace:
 mapbox_gl_platform_interface:
   git:
-    url: https://github.com/tobrun/flutter-mapbox-gl.git
+    url: https://github.com/carlosllorca/flutter-map.git
     path: mapbox_gl_platform_interface
 
 With:

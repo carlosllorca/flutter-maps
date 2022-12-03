@@ -29,7 +29,7 @@ abstract class MapBoxUtils {
             return token;
         } catch (Exception e) {
             Log.e(TAG, "Failed to find an Access Token in the Application meta-data. Maps may not load correctly. " +
-                    "Please refer to the installation guide at https://github.com/tobrun/flutter-mapbox-gl#mapbox-access-token " +
+                    "Please refer to the installation guide at https://github.com/carlosllorca/flutter-map#mapbox-access-token " +
                     "for troubleshooting advice." + e.getMessage());
         }
         return null;
