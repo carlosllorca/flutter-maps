@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart'; // ignore: unnecessary_import
+import 'package:flutter/rendering.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
 import 'main.dart';
@@ -21,8 +21,8 @@ class AnnotationOrderBody extends StatefulWidget {
 }
 
 class _AnnotationOrderBodyState extends State<AnnotationOrderBody> {
-  late MapboxMapController controllerOne;
-  late MapboxMapController controllerTwo;
+  MapboxMapController controllerOne;
+  MapboxMapController controllerTwo;
 
   final LatLng center = const LatLng(36.580664, 32.5563837);
 

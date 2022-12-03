@@ -9,19 +9,19 @@ part of mapbox_gl_platform_interface;
 FillOptions translateFillOptions(FillOptions options, LatLng delta) {
   if (options.geometry != null) {
     List<List<LatLng>> newGeometry = [];
-    for (var ring in options.geometry!) {
+    for (var ring in options.geometry) {
       List<LatLng> newRing = [];
       for (var coords in ring) {
         newRing.add(coords + delta);
       }
       newGeometry.add(newRing);
     }
-    return options.copyWith(FillOptions(geometry: newGeometry));
+    return FillOptions(geometry: newGeometry);
   }
   return options;
 }
 
-class Fill implements Annotation {
+class Fill {
   Fill(this._id, this.options, [this._data]);
 
   /// A unique identifier for this fill.
@@ -30,8 +30,8 @@ class Fill implements Annotation {
   final String _id;
   String get id => _id;
 
-  final Map? _data;
-  Map? get data => _data;
+  final Map _data;
+  Map get data => _data;
 
   /// The fill configuration options most recently applied programmatically
   /// via the map controller.
@@ -39,20 +39,6 @@ class Fill implements Annotation {
   /// The returned value does not reflect any changes made to the fill through
   /// touch events. Add listeners to the owning map controller to track those.
   FillOptions options;
-
-  @override
-  Map<String, dynamic> toGeoJson() {
-    final geojson = options.toGeoJson();
-    geojson["id"] = id;
-    geojson["properties"]["id"] = id;
-
-    return geojson;
-  }
-
-  @override
-  void translate(LatLng delta) {
-    options = translateFillOptions(options, delta);
-  }
 }
 
 /// Configuration options for [Fill] instances.
@@ -72,16 +58,19 @@ class FillOptions {
       this.geometry,
       this.draggable});
 
-  final double? fillOpacity;
-  final String? fillColor;
-  final String? fillOutlineColor;
-  final String? fillPattern;
-  final List<List<LatLng>>? geometry;
-  final bool? draggable;
+  final double fillOpacity;
+  final String fillColor;
+  final String fillOutlineColor;
+  final String fillPattern;
+  final List<List<LatLng>> geometry;
+  final bool draggable;
 
   static const FillOptions defaultOptions = FillOptions();
 
   FillOptions copyWith(FillOptions changes) {
+    if (changes == null) {
+      return this;
+    }
     return FillOptions(
       fillOpacity: changes.fillOpacity ?? fillOpacity,
       fillColor: changes.fillColor ?? fillColor,
@@ -92,7 +81,7 @@ class FillOptions {
     );
   }
 
-  dynamic toJson([bool addGeometry = true]) {
+  dynamic toJson() {
     final Map<String, dynamic> json = <String, dynamic>{};
 
     void addIfPresent(String fieldName, dynamic value) {
@@ -105,30 +94,13 @@ class FillOptions {
     addIfPresent('fillColor', fillColor);
     addIfPresent('fillOutlineColor', fillOutlineColor);
     addIfPresent('fillPattern', fillPattern);
-    if (addGeometry) {
-      addIfPresent(
-          'geometry',
-          geometry
-              ?.map((List<LatLng> latLngList) =>
-                  latLngList.map((LatLng latLng) => latLng.toJson()).toList())
-              .toList());
-    }
+    addIfPresent(
+        'geometry',
+        geometry
+            ?.map((List<LatLng> latLngList) =>
+                latLngList.map((LatLng latLng) => latLng.toJson())?.toList())
+            ?.toList());
     addIfPresent('draggable', draggable);
     return json;
-  }
-
-  Map<String, dynamic> toGeoJson() {
-    return {
-      "type": "Feature",
-      "properties": toJson(false),
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": geometry!
-            .map((List<LatLng> latLngList) => latLngList
-                .map((LatLng latLng) => latLng.toGeoJsonCoordinates())
-                .toList())
-            .toList()
-      }
-    };
   }
 }

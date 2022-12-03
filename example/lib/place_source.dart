@@ -35,8 +35,7 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
   static const LAYER_ID = 'sydney_layer';
 
   bool sourceAdded = false;
-  bool layerAdded = false;
-  late MapboxMapController controller;
+  MapboxMapController controller;
 
   void _onMapCreated(MapboxMapController controller) {
     this.controller = controller;
@@ -64,47 +63,20 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
     );
   }
 
-  /// Update an asset image as a source to the currently displayed style
-  Future<void> updateImageSourceFromAsset(
-      String imageSourceId, String assetName) async {
-    final ByteData bytes = await rootBundle.load(assetName);
-    final Uint8List list = bytes.buffer.asUint8List();
-    return controller.updateImageSource(
-      imageSourceId,
-      list,
-      const LatLngQuad(
-        bottomRight: LatLng(-33.89884564291081, 151.25229835510254),
-        bottomLeft: LatLng(-33.89884564291081, 151.20131492614746),
-        topLeft: LatLng(-33.934601369931634, 151.20131492614746),
-        topRight: LatLng(-33.934601369931634, 151.25229835510254),
-      ),
-    );
-  }
-
   Future<void> removeImageSource(String imageSourceId) {
-    return controller.removeSource(imageSourceId);
+    return controller.removeImageSource(imageSourceId);
   }
 
   Future<void> addLayer(String imageLayerId, String imageSourceId) {
-    if (layerAdded) {
-      removeLayer(imageLayerId);
-    }
-    setState(() => layerAdded = true);
-    return controller.addImageLayer(imageLayerId, imageSourceId);
+    return controller.addLayer(imageLayerId, imageSourceId);
   }
 
   Future<void> addLayerBelow(
       String imageLayerId, String imageSourceId, String belowLayerId) {
-    if (layerAdded) {
-      removeLayer(imageLayerId);
-    }
-    setState(() => layerAdded = true);
-    return controller.addImageLayerBelow(
-        imageLayerId, imageSourceId, belowLayerId);
+    return controller.addLayerBelow(imageLayerId, imageSourceId, belowLayerId);
   }
 
   Future<void> removeLayer(String imageLayerId) {
-    setState(() => layerAdded = false);
     return controller.removeLayer(imageLayerId);
   }
 
@@ -114,14 +86,17 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        SizedBox(
-          height: 300.0,
-          child: MapboxMap(
-            accessToken: MapsDemo.ACCESS_TOKEN,
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: const CameraPosition(
-              target: LatLng(-33.852, 151.211),
-              zoom: 10.0,
+        Center(
+          child: SizedBox(
+            width: 300.0,
+            height: 200.0,
+            child: MapboxMap(
+              accessToken: MapsDemo.ACCESS_TOKEN,
+              onMapCreated: _onMapCreated,
+              initialCameraPosition: const CameraPosition(
+                target: LatLng(-33.852, 151.211),
+                zoom: 11.0,
+              ),
             ),
           ),
         ),
@@ -130,62 +105,55 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                Column(
+                Row(
                   children: <Widget>[
-                    TextButton(
-                      child: const Text('Add source (asset image)'),
-                      onPressed: sourceAdded
-                          ? null
-                          : () {
-                              addImageSourceFromAsset(
-                                      SOURCE_ID, 'assets/sydney.png')
-                                  .then((value) {
-                                setState(() => sourceAdded = true);
-                              });
-                            },
-                    ),
-                    TextButton(
-                      child: const Text('Update source (asset image)'),
-                      onPressed: !sourceAdded
-                          ? null
-                          : () {
-                              updateImageSourceFromAsset(SOURCE_ID,
-                                      'assets/symbols/custom-icon.png')
-                                  .then((value) {
-                                setState(() => sourceAdded = true);
-                              });
-                            },
-                    ),
-                    TextButton(
-                      child: const Text('Remove source (asset image)'),
-                      onPressed: sourceAdded
-                          ? () async {
-                              await removeLayer(LAYER_ID);
-                              removeImageSource(SOURCE_ID).then((value) {
-                                setState(() => sourceAdded = false);
-                              });
-                            }
-                          : null,
-                    ),
-                    TextButton(
-                      child: const Text('Show layer'),
-                      onPressed: sourceAdded
-                          ? () => addLayer(LAYER_ID, SOURCE_ID)
-                          : null,
-                    ),
-                    TextButton(
-                      child: const Text('Show layer below water'),
-                      onPressed: sourceAdded
-                          ? () => addLayerBelow(LAYER_ID, SOURCE_ID, 'water')
-                          : null,
-                    ),
-                    TextButton(
-                      child: const Text('Hide layer'),
-                      onPressed:
-                          sourceAdded ? () => removeLayer(LAYER_ID) : null,
+                    Column(
+                      children: <Widget>[
+                        TextButton(
+                          child: const Text('Add source (asset image)'),
+                          onPressed: sourceAdded
+                              ? null
+                              : () {
+                                  addImageSourceFromAsset(
+                                          SOURCE_ID, 'assets/sydney.png')
+                                      .then((value) {
+                                    setState(() => sourceAdded = true);
+                                  });
+                                },
+                        ),
+                        TextButton(
+                          child: const Text('Remove source (asset image)'),
+                          onPressed: sourceAdded
+                              ? () async {
+                                  await removeLayer(LAYER_ID);
+                                  removeImageSource(SOURCE_ID).then((value) {
+                                    setState(() => sourceAdded = false);
+                                  });
+                                }
+                              : null,
+                        ),
+                        TextButton(
+                          child: const Text('Show layer'),
+                          onPressed: sourceAdded
+                              ? () => addLayer(LAYER_ID, SOURCE_ID)
+                              : null,
+                        ),
+                        TextButton(
+                          child: const Text('Show layer below water'),
+                          onPressed: sourceAdded
+                              ? () =>
+                                  addLayerBelow(LAYER_ID, SOURCE_ID, 'water')
+                              : null,
+                        ),
+                        TextButton(
+                          child: const Text('Hide layer'),
+                          onPressed:
+                              sourceAdded ? () => removeLayer(LAYER_ID) : null,
+                        ),
+                      ],
                     ),
                   ],
-                ),
+                )
               ],
             ),
           ),

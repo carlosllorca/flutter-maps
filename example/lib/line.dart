@@ -3,10 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
 
 import 'main.dart';
@@ -33,10 +31,9 @@ class LineBodyState extends State<LineBody> {
 
   static final LatLng center = const LatLng(-33.86711, 151.1947171);
 
-  MapboxMapController? controller;
+  MapboxMapController controller;
   int _lineCount = 0;
-  Line? _selectedLine;
-  final String _linePatternImage = "assets/fill/cat_silhouette_pattern.png";
+  Line _selectedLine;
 
   void _onMapCreated(MapboxMapController controller) {
     this.controller = controller;
@@ -45,35 +42,34 @@ class LineBodyState extends State<LineBody> {
 
   @override
   void dispose() {
-    controller?.onLineTapped.remove(_onLineTapped);
+    controller?.onLineTapped?.remove(_onLineTapped);
     super.dispose();
   }
 
-  /// Adds an asset image to the currently displayed style
-  Future<void> addImageFromAsset(String name, String assetName) async {
-    final ByteData bytes = await rootBundle.load(assetName);
-    final Uint8List list = bytes.buffer.asUint8List();
-    return controller!.addImage(name, list);
-  }
-
-  _onLineTapped(Line line) async {
-    await _updateSelectedLine(
-      LineOptions(lineColor: "#ff0000"),
-    );
+  void _onLineTapped(Line line) {
+    if (_selectedLine != null) {
+      _updateSelectedLine(
+        const LineOptions(
+          lineWidth: 28.0,
+        ),
+      );
+    }
     setState(() {
       _selectedLine = line;
     });
-    await _updateSelectedLine(
-      LineOptions(lineColor: "#ffe100"),
+    _updateSelectedLine(
+      LineOptions(
+          // linecolor: ,
+          ),
     );
   }
 
-  _updateSelectedLine(LineOptions changes) async {
-    if (_selectedLine != null) controller!.updateLine(_selectedLine!, changes);
+  void _updateSelectedLine(LineOptions changes) {
+    controller.updateLine(_selectedLine, changes);
   }
 
   void _add() {
-    controller!.addLine(
+    controller.addLine(
       LineOptions(
           geometry: [
             LatLng(-33.86711, 151.1947171),
@@ -91,59 +87,39 @@ class LineBodyState extends State<LineBody> {
     });
   }
 
-  _move() async {
-    final currentStart = _selectedLine!.options.geometry![0];
-    final currentEnd = _selectedLine!.options.geometry![1];
-    final end =
-        LatLng(currentEnd.latitude + 0.001, currentEnd.longitude + 0.001);
-    final start =
-        LatLng(currentStart.latitude - 0.001, currentStart.longitude - 0.001);
-    await controller!
-        .updateLine(_selectedLine!, LineOptions(geometry: [start, end]));
-  }
-
   void _remove() {
-    controller!.removeLine(_selectedLine!);
+    controller.removeLine(_selectedLine);
     setState(() {
       _selectedLine = null;
       _lineCount -= 1;
     });
   }
 
-  Future<void> _changeLinePattern() async {
-    String? current =
-        _selectedLine!.options.linePattern == null ? "assetImage" : null;
-    await _updateSelectedLine(
-      LineOptions(linePattern: current),
-    );
-  }
-
   Future<void> _changeAlpha() async {
-    double? current = _selectedLine!.options.lineOpacity;
+    double current = _selectedLine.options.lineOpacity;
     if (current == null) {
       // default value
       current = 1.0;
     }
 
-    await _updateSelectedLine(
+    _updateSelectedLine(
       LineOptions(lineOpacity: current < 0.1 ? 1.0 : current * 0.75),
     );
   }
 
   Future<void> _toggleVisible() async {
-    double? current = _selectedLine!.options.lineOpacity;
+    double current = _selectedLine.options.lineOpacity;
     if (current == null) {
       // default value
       current = 1.0;
     }
-    await _updateSelectedLine(
+    _updateSelectedLine(
       LineOptions(lineOpacity: current == 0.0 ? 1.0 : 0.0),
     );
   }
 
-  _onStyleLoadedCallback() async {
-    addImageFromAsset("assetImage", _linePatternImage);
-    await controller!.addLine(
+  void onStyleLoadedCallback() {
+    controller.addLine(
       LineOptions(
         geometry: [LatLng(37.4220, -122.0841), LatLng(37.4240, -122.0941)],
         lineColor: "#ff0000",
@@ -161,11 +137,12 @@ class LineBodyState extends State<LineBody> {
       children: <Widget>[
         Center(
           child: SizedBox(
-            height: 400.0,
+            width: 300.0,
+            height: 200.0,
             child: MapboxMap(
               accessToken: MapsDemo.ACCESS_TOKEN,
               onMapCreated: _onMapCreated,
-              onStyleLoadedCallback: _onStyleLoadedCallback,
+              onStyleLoadedCallback: onStyleLoadedCallback,
               initialCameraPosition: const CameraPosition(
                 target: LatLng(-33.852, 151.211),
                 zoom: 11.0,
@@ -178,9 +155,9 @@ class LineBodyState extends State<LineBody> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                Column(
+                Row(
                   children: <Widget>[
-                    Row(
+                    Column(
                       children: <Widget>[
                         TextButton(
                           child: const Text('add'),
@@ -190,23 +167,9 @@ class LineBodyState extends State<LineBody> {
                           child: const Text('remove'),
                           onPressed: (_selectedLine == null) ? null : _remove,
                         ),
-                        TextButton(
-                          child: const Text('move'),
-                          onPressed: (_selectedLine == null)
-                              ? null
-                              : () async {
-                                  await _move();
-                                },
-                        ),
-                        TextButton(
-                          child: const Text('change line-pattern'),
-                          onPressed: (_selectedLine == null)
-                              ? null
-                              : _changeLinePattern,
-                        ),
                       ],
                     ),
-                    Row(
+                    Column(
                       children: <Widget>[
                         TextButton(
                           child: const Text('change alpha'),
@@ -223,8 +186,8 @@ class LineBodyState extends State<LineBody> {
                           onPressed: (_selectedLine == null)
                               ? null
                               : () async {
-                                  var latLngs = await controller!
-                                      .getLineLatLngs(_selectedLine!);
+                                  var latLngs = await controller
+                                      .getLineLatLngs(_selectedLine);
                                   for (var latLng in latLngs) {
                                     print(latLng.toString());
                                   }
@@ -233,7 +196,7 @@ class LineBodyState extends State<LineBody> {
                       ],
                     ),
                   ],
-                ),
+                )
               ],
             ),
           ),

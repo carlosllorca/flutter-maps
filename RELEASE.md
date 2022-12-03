@@ -2,28 +2,20 @@
 
 This document describes the steps needed to make a release:
 
-### Update Changelog
-
 For each supported library:
  - `mapbox_gl_platform_interface`
  - `mapbox_gl_web`
  - `flutter-mapbox-gl`
 
-Update the changelog by listing the commits that occurred for that given library.
-Starting with `flutter-mapbox-gl` allows you to capture them all and be more granular
-when updating the other libraries. Once the CHANGELOG.md's are updated, make a PR
-and merge to master.
+Perform the following actions:
+ - Update `CHANGELOG.md` with the commits associated since previous release.
+ - Update library version in `pubspec.yaml`
 
-### Release libraries
+Publish `mapbox_gl_platform_interface`, `mapbox_gl_web` and `flutter-mapbox-gl` after eachother with:
+ - `flutter pub publish`
 
-#### Release `mapbox_gl_platform_interface`
-
-Update library version in `mapbox_gl_platform_interface/pubspec.yaml` and run `flutter pub publish`.
-
-#### Release `mapbox_gl_web`
-
-Update library version in `mapbox_gl_web/pubspec.yaml` in `mapbox_gl_platform_interface`,
-
+Before publishgin in `mapbox_gl_web` update the version of the `mapbox_gl_platform_interface`
+Repeat this action for `flutter-mapbox-gl` for both dependencies:
 
 ```
 Replace:
@@ -41,13 +33,4 @@ dependency_overrides:
     path: ../mapbox_gl_platform_interface
 ```
 
-and run `flutter pub publish` in `mapbox_gl_web`.
-
-#### Release `flutter-mapbox-gl`
-
-Update library version in `pubspec.yaml`, replace both web as platform interface conform to above and run `flutter pub publish` from root of project.
-
-### Tag Release
-
-Once the PR that updates version numbers is merged, create a release for that version number
-with the contents of the root CHANGELOG.md.
+Before being able to publish `flutter-mapbox-gl`, you will have to PR and merge changelog changes.

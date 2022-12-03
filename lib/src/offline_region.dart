@@ -4,10 +4,10 @@ part of mapbox_gl;
 /// the download is initiated.
 class OfflineRegionDefinition {
   const OfflineRegionDefinition({
-    required this.bounds,
-    required this.mapStyleUrl,
-    required this.minZoom,
-    required this.maxZoom,
+    @required this.bounds,
+    @required this.mapStyleUrl,
+    @required this.minZoom,
+    @required this.maxZoom,
     this.includeIdeographs = false,
   });
 
@@ -33,7 +33,11 @@ class OfflineRegionDefinition {
 
   factory OfflineRegionDefinition.fromMap(Map<String, dynamic> map) {
     return OfflineRegionDefinition(
-      bounds: _latLngBoundsFromList(map['bounds']),
+      bounds: map['bounds'] != null
+          ? _latLngBoundsFromList(
+              map['bounds'],
+            )
+          : null,
       mapStyleUrl: map['mapStyleUrl'],
       // small integers may deserialize to Int
       minZoom: map['minZoom'].toDouble(),
@@ -43,19 +47,29 @@ class OfflineRegionDefinition {
   }
 
   static LatLngBounds _latLngBoundsFromList(List<dynamic> json) {
+    if (json == null) {
+      return null;
+    }
     return LatLngBounds(
-      southwest: LatLng(json[0][0], json[0][1]),
-      northeast: LatLng(json[1][0], json[1][1]),
+      southwest: _latLngFromList(json[0]),
+      northeast: _latLngFromList(json[1]),
     );
+  }
+
+  static LatLng _latLngFromList(dynamic json) {
+    if (json == null) {
+      return null;
+    }
+    return LatLng(json[0], json[1]);
   }
 }
 
 /// Description of a downloaded region including its identifier.
 class OfflineRegion {
   const OfflineRegion({
-    required this.id,
-    required this.definition,
-    required this.metadata,
+    this.id,
+    this.definition,
+    this.metadata,
   });
 
   final int id;
@@ -63,6 +77,10 @@ class OfflineRegion {
   final Map<String, dynamic> metadata;
 
   factory OfflineRegion.fromMap(Map<String, dynamic> json) {
+    if (json == null) {
+      return null;
+    }
+
     return OfflineRegion(
       id: json['id'],
       definition: OfflineRegionDefinition.fromMap(json['definition']),
