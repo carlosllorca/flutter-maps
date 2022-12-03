@@ -87,7 +87,7 @@ packages:
       path: mapbox_gl_platform_interface
       ref: HEAD
       resolved-ref: "37703aa872a877d0dc4c88fe358647003f4949cc"
-      url: "https://github.com/tobrun/flutter-mapbox-gl.git"
+      url: "https://github.com/carlosllorca/flutter-map.git"
     source: git
     version: "0.9.0"
   mapbox_gl_web:
@@ -96,7 +96,7 @@ packages:
       path: mapbox_gl_web
       ref: HEAD
       resolved-ref: "37703aa872a877d0dc4c88fe358647003f4949cc"
-      url: "https://github.com/tobrun/flutter-mapbox-gl.git"
+      url: "https://github.com/carlosllorca/flutter-map.git"
     source: git
     version: "0.9.0"
   meta:
